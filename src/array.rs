@@ -1,7 +1,7 @@
 //! 与数组有关的问题，如滑窗法等
 
 
-use std::cmp::{min, max};
+use std::cmp::min;
 use std::collections::{LinkedList, HashMap};
 
 /// 54. 螺旋矩阵
@@ -464,52 +464,50 @@ pub fn remove_duplicates2(nums: &mut Vec<i32>) -> i32 {
 }
 
 
-/// 81. 搜索旋转排序数组 II
+/// [81. 搜索旋转排序数组 II](https://leetcode-cn.com/problems/search-in-rotated-sorted-array-ii/)
 ///
 /// 已知存在一个按非降序排列的整数数组 nums ，数组中的值不必互不相同。
 ///
 /// 在传递给函数之前，nums 在预先未知的某个下标 k（0 <= k < nums.length）上进行了 旋转 ，使数组变为 [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]（下标 从 0 开始 计数）。例如， [0,1,2,4,4,4,5,6,6,7] 在下标 5 处经旋转后可能变为 [4,5,6,6,7,0,1,2,4,4] 。
 ///
 /// 给你 旋转后 的数组 nums 和一个整数 target ，请你编写一个函数来判断给定的目标值是否存在于数组中。如果 nums 中存在这个目标值 target ，则返回 true ，否则返回 false 。
-///
-/// LC: [81. 搜索旋转排序数组 II](https://leetcode-cn.com/problems/search-in-rotated-sorted-array-ii/)
 pub fn search(nums: Vec<i32>, target: i32) -> bool {
     return nums.contains(&target);
-    // if nums.is_empty() { return false; }
-    // let (mut left_cur, mut right_cur) = (0, nums.len() - 1);
-    //
-    // while left_cur <= right_cur {
-    //     let mid = (left_cur + right_cur) / 2;
-    //     if nums[mid] == target {
-    //         return true;
-    //     }
-    //
-    //     if nums[mid] > nums[left_cur] {
-    //         // nums[left_cur..mid]是非严格递增顺序
-    //         if nums[mid] > target {
-    //             right_cur = mid - 1;
-    //         } else {
-    //             // nums[mid] < target
-    //             left_cur = mid + 1;
-    //         }
-    //     } else if nums[mid] < nums[left_cur] {
-    //         // nums[mid..]严格递增
-    //         if nums[mid] > target {
-    //             right_cur = mid - 1;
-    //         } else {
-    //             if nums[left_cur] == target {
-    //                 return true;
-    //             } else if nums[left_cur] > target {
-    //                 left_cur = mid + 1;
-    //             } else {
-    //                 right_cur = mid - 1;
-    //             }
-    //         }
-    //     } else {
-    //         left_cur += 1;
-    //     }
-    // }
-    // return false;
+//     // if nums.is_empty() { return false; }
+//     // let (mut left_cur, mut right_cur) = (0, nums.len() - 1);
+//     //
+//     // while left_cur <= right_cur {
+//     //     let mid = (left_cur + right_cur) / 2;
+//     //     if nums[mid] == target {
+//     //         return true;
+//     //     }
+//     //
+//     //     if nums[mid] > nums[left_cur] {
+//     //         // nums[left_cur..mid]是非严格递增顺序
+//     //         if nums[mid] > target {
+//     //             right_cur = mid - 1;
+//     //         } else {
+//     //             // nums[mid] < target
+//     //             left_cur = mid + 1;
+//     //         }
+//     //     } else if nums[mid] < nums[left_cur] {
+//     //         // nums[mid..]严格递增
+//     //         if nums[mid] > target {
+//     //             right_cur = mid - 1;
+//     //         } else {
+//     //             if nums[left_cur] == target {
+//     //                 return true;
+//     //             } else if nums[left_cur] > target {
+//     //                 left_cur = mid + 1;
+//     //             } else {
+//     //                 right_cur = mid - 1;
+//     //             }
+//     //         }
+//     //     } else {
+//     //         left_cur += 1;
+//     //     }
+//     // }
+//     // return false;
 }
 
 
@@ -567,16 +565,55 @@ pub fn find_max_length(nums: Vec<i32>) -> i32 {
 }
 
 
-/// [1418. 点菜展示表](https://leetcode-cn.com/problems/display-table-of-food-orders-in-a-restaurant/)
-///
-/// 给你一个数组 orders，表示客户在餐厅中完成的订单，确切地说， orders[i]=[customerNamei,tableNumberi,foodItemi] ，其中 customerNamei 是客户的姓名，tableNumberi 是客户所在餐桌的桌号，而 foodItemi 是客户点的餐品名称。
-///
-/// 请你返回该餐厅的 点菜展示表 。在这张表中，表中第一行为标题，其第一列为餐桌桌号 “Table” ，后面每一列都是按字母顺序排列的餐品名称。接下来每一行中的项则表示每张餐桌订购的相应餐品数量，第一列应当填对应的桌号，后面依次填写下单的餐品数量
-///
-/// 注意：客户姓名不是点菜展示表的一部分。此外，表中的数据行应该按餐桌桌号升序排列。
-pub fn display_table(orders: Vec<Vec<String>>) -> Vec<Vec<String>> {
-    if orders.is_empty() { return Vec::new(); }
-    
+// /// [1418. 点菜展示表](https://leetcode-cn.com/problems/display-table-of-food-orders-in-a-restaurant/)
+// ///
+// /// 给你一个数组 orders，表示客户在餐厅中完成的订单，确切地说， orders[i]=[customerNamei,tableNumberi,foodItemi] ，其中 customerNamei 是客户的姓名，tableNumberi 是客户所在餐桌的桌号，而 foodItemi 是客户点的餐品名称。
+// ///
+// /// 请你返回该餐厅的 点菜展示表 。在这张表中，表中第一行为标题，其第一列为餐桌桌号 “Table” ，后面每一列都是按字母顺序排列的餐品名称。接下来每一行中的项则表示每张餐桌订购的相应餐品数量，第一列应当填对应的桌号，后面依次填写下单的餐品数量
+// ///
+// /// 注意：客户姓名不是点菜展示表的一部分。此外，表中的数据行应该按餐桌桌号升序排列。
+// pub fn display_table(orders: Vec<Vec<String>>) -> Vec<Vec<String>> {
+//     if orders.is_empty() { return Vec::new(); }
+//
+//
+//     return Vec::new();
+// }
 
-    return Vec::new();
+/// [912. 排序数组（快排）](https://leetcode-cn.com/problems/sort-an-array/)
+///   给你一个整数数组 nums，请你将该数组升序排列。
+///
+///  示例 1：输入：nums = [5,2,3,1] 输出：[1,2,3,5]
+///
+///  示例 2：输入：nums = [5,1,1,2,0,0] 输出：[0,0,1,1,2,5]
+pub fn sort_array(nums: Vec<i32>) -> Vec<i32> {
+    if nums.len() < 2 { return nums; }
+    let mut nums = nums;
+
+    fn quick_sort(nums: &mut Vec<i32>, start: usize, end: usize) {
+        if start >= end { return; }
+        let (mut head, mut tail) = (start, end);
+        while head < tail {
+            while head < tail && nums[tail] > nums[start] {
+                tail -= 1;
+            }
+            while head < tail && nums[head] <= nums[start] {
+                head += 1;
+            }
+            // nums.swap(head, tail);
+            let temp = nums[head];
+            nums[head] = nums[tail];
+            nums[tail] = temp;
+        }
+        // nums.swap(head, start);
+        let temp = nums[start];
+        nums[start] = nums[head];
+        nums[head] = temp;
+        if head != start {
+            quick_sort(nums, start, head - 1);
+        }
+        quick_sort(nums, head + 1, end);
+    }
+    let length = nums.len();
+    quick_sort(&mut nums, 0, length - 1);
+    return nums;
 }

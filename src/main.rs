@@ -326,5 +326,15 @@ fn main() {
     let column_number = 52;
     let r = simple::convert_to_title(column_number);
     println!("r: {:?}", r);
+
+    // 198. 打家劫舍
+    let nums = [2, 17, 9, 3, 1].to_vec();
+    let r = dp::rob(nums);
+    println!("r: {:?}", r);
+
+    // 912. 排序数组
+    let nums = [5, 1, 1, 2, 0, 0].to_vec();
+    let r = array::sort_array(nums);
+    println!("r: {:?}", r);
 }
 

@@ -1,7 +1,7 @@
 //! 使用动态规划解决的题目
 
 use std::cmp::{max, min};
-use std::collections::HashMap;
+use std::collections::{HashMap, LinkedList};
 
 /// 132. 分割回文串 II [✔]
 ///
@@ -471,24 +471,73 @@ pub fn delete_and_earn(nums: Vec<i32>) -> i32 {
 ///
 /// 给你一个整数数组 nums 和一个整数 k ，编写一个函数来判断该数组是否含有同时满足下述条件的连续子数组：子数组大小 至少为 2 ，且子数组元素总和为 k 的倍数。如果存在，返回 true ；否则，返回 false 。如果存在一个整数 n ，令整数 x 符合 x = n * k ，则称 x 是 k 的一个倍数。
 /// LC: [523. 连续的子数组](https://leetcode-cn.com/problems/continuous-subarray-sum/)
-pub fn check_subarray_sum2(nums: Vec<i32>, k: i32) -> bool {
-    if nums.len() < 2 { return false; }
-    if k == 0 { return false; }
-    if k == 1 { return true; }
+// pub fn check_subarray_sum2(nums: Vec<i32>, k: i32) -> bool {
+//     if nums.len() < 2 { return false; }
+//     if k == 0 { return false; }
+//     if k == 1 { return true; }
+//
+//     let mut prefix_sum = vec![0; nums.len() + 1];
+//     // prefix_sum[i] = nums[..i].sum()
+//
+//     for i in 1..prefix_sum.len() {
+//         prefix_sum[i] = prefix_sum[i - 1] + nums[i - 1];
+//     }
+//
+//     for i in 0..prefix_sum.len() {
+//         for j in i + 2..prefix_sum.len() {
+//             if prefix_sum[j] - prefix_sum[i] % k == 0 {
+//                 return true;
+//             }
+//         }
+//     }
+//     return false;
+// }
 
-    let mut prefix_sum = vec![0; nums.len() + 1];
-    // prefix_sum[i] = nums[..i].sum()
 
-    for i in 1..prefix_sum.len() {
-        prefix_sum[i] = prefix_sum[i - 1] + nums[i - 1];
+/// 198. [打家劫舍](https://leetcode-cn.com/problems/house-robber/)
+///
+/// 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+///
+/// 给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+pub fn rob(nums: Vec<i32>) -> i32 {
+    if nums.len() == 0 { return 0; }
+    if nums.len() == 1 { return nums[0]; };
+    if nums.len() == 2 { return std::cmp::max(nums[0], nums[1]); }
+
+    let mut dp = vec![0; nums.len()];
+    dp[0] = nums[0];
+    if nums[0] < nums[1] {
+        dp[1] = nums[1];
+    } else {
+        dp[1] = nums[0];
     }
 
-    for i in 0..prefix_sum.len() {
-        for j in i + 2..prefix_sum.len() {
-            if prefix_sum[j] - prefix_sum[i] % k == 0 {
-                return true;
+    for i in 2..nums.len() {
+        if dp[i - 1] > dp[i - 2] + nums[i] {
+            dp[i] = dp[i - 1];
+        } else {
+            dp[i] = dp[i - 2] + nums[i];
+        }
+    }
+
+    let mut path = LinkedList::new();
+    let mut cur = dp.len() - 1;
+    loop {
+        if cur == 0 {
+            path.push_front(0);
+            break;
+        }
+        if dp[cur] == dp[cur - 1] {
+            // path.push_front(cur - 1);
+            cur -= 1;
+        } else {
+            path.push_front(cur);
+            if cur == 1 {
+                break;
+            } else {
+                cur -= 2;
             }
         }
     }
-    return false;
+    return dp[dp.len() - 1];
 }
