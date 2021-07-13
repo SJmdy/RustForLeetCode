@@ -1,6 +1,8 @@
 //! 使用栈或队列解决的问题
 
+use std::cmp::min;
 use std::collections::LinkedList;
+
 
 /// 1047. 删除字符串中的所有相邻重复项 [✔]
 ///
@@ -273,3 +275,30 @@ pub fn next_greater_elements(nums: Vec<i32>) -> Vec<i32> {
 }
 
 
+/// [面试题 17.21. 直方图的水量(单调栈)](https://leetcode-cn.com/problems/volume-of-histogram-lcci/)
+///
+/// 给定一个直方图(也称柱状图)，假设有人从上面源源不断地倒水，最后直方图能存多少水量?直方图的宽度为 1。
+///
+/// 解题思路：双指针
+///
+/// 还是单调栈解法更好理解
+pub fn trap(height: Vec<i32>) -> i32 {
+    if height.len() < 2 { return 0; }
+    let mut res = 0;
+
+    let mut stack: LinkedList<usize> = LinkedList::new();
+    for i in 0..height.len() {
+        while !stack.is_empty() && height[*stack.back().unwrap()] < height[i] {
+            let top = stack.pop_back().unwrap();
+            let left = match stack.back() {
+                None => break,
+                Some(v) => *v
+            };
+            let w = (i - left) as i32 - 1;
+            let h = min(height[i], height[left]) - height[top];
+            res += w * h;
+        }
+        stack.push_back(i);
+    }
+    return res;
+}

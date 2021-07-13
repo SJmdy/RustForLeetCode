@@ -336,5 +336,21 @@ fn main() {
     let nums = [5, 1, 1, 2, 0, 0].to_vec();
     let r = array::sort_array(nums);
     println!("r: {:?}", r);
+
+    // 275. H 指数 II
+    let citations = [0].to_vec();
+    let r = array::h_index(citations);
+    println!("r: {:?}", r);
+
+    // 81. 搜索旋转排序数组 II
+    let nums = [2, 5, 6, 0, 0, 1, 2].to_vec();
+    let target = 5;
+    let r = array::search(nums, target);
+    println!("r: {:?}", r);
+
+    // 面试题 17.21. 直方图的水量
+    let height = [4, 2, 0, 3, 2, 5].to_vec();
+    let r = stack_or_queue::trap(height);
+    println!("r: {:?}", r);
 }
 
