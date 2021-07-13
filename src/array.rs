@@ -472,42 +472,20 @@ pub fn remove_duplicates2(nums: &mut Vec<i32>) -> i32 {
 ///
 /// 给你 旋转后 的数组 nums 和一个整数 target ，请你编写一个函数来判断给定的目标值是否存在于数组中。如果 nums 中存在这个目标值 target ，则返回 true ，否则返回 false 。
 pub fn search(nums: Vec<i32>, target: i32) -> bool {
-    return nums.contains(&target);
-//     // if nums.is_empty() { return false; }
-//     // let (mut left_cur, mut right_cur) = (0, nums.len() - 1);
-//     //
-//     // while left_cur <= right_cur {
-//     //     let mid = (left_cur + right_cur) / 2;
-//     //     if nums[mid] == target {
-//     //         return true;
-//     //     }
-//     //
-//     //     if nums[mid] > nums[left_cur] {
-//     //         // nums[left_cur..mid]是非严格递增顺序
-//     //         if nums[mid] > target {
-//     //             right_cur = mid - 1;
-//     //         } else {
-//     //             // nums[mid] < target
-//     //             left_cur = mid + 1;
-//     //         }
-//     //     } else if nums[mid] < nums[left_cur] {
-//     //         // nums[mid..]严格递增
-//     //         if nums[mid] > target {
-//     //             right_cur = mid - 1;
-//     //         } else {
-//     //             if nums[left_cur] == target {
-//     //                 return true;
-//     //             } else if nums[left_cur] > target {
-//     //                 left_cur = mid + 1;
-//     //             } else {
-//     //                 right_cur = mid - 1;
-//     //             }
-//     //         }
-//     //     } else {
-//     //         left_cur += 1;
-//     //     }
-//     // }
-//     // return false;
+    // return nums.contains(&target);
+    if nums.is_empty() { return false; }
+
+    let (mut left, mut right) = (0, nums.len() - 1);
+    while left <= right {
+        let mid = (left + right) / 2;
+        if nums[mid] == target { return true; }
+        if nums[mid] > nums[right] {
+            left = mid + 1;
+        } else {
+            right -= 1;
+        }
+    }
+    return false;
 }
 
 
@@ -616,4 +594,27 @@ pub fn sort_array(nums: Vec<i32>) -> Vec<i32> {
     let length = nums.len();
     quick_sort(&mut nums, 0, length - 1);
     return nums;
+}
+
+
+/// 275. H 指数 II
+///
+/// 给定一位研究者论文被引用次数的数组（被引用次数是非负整数），数组已经按照 升序排列 。编写一个方法，计算出研究者的 h 指数。
+///
+/// h 指数的定义: “h 代表“高引用次数”（high citations），一名科研人员的 h 指数是指他（她）的 （N 篇论文中）总共有 h 篇论文分别被引用了至少 h 次。（其余的 N - h 篇论文每篇被引用次数不多于 h 次。）"
+///
+/// 示例: 输入: citations = [0,1,3,5,6] 输出: 3
+/// 解释: 给定数组表示研究者总共有 5 篇论文，每篇论文相应的被引用了 0, 1, 3, 5, 6 次。 由于研究者有 3 篇论文每篇至少被引用了 3 次，其余两篇论文每篇被引用不多于 3 次，所以她的 h 指数是 3。
+///
+/// 设当前
+pub fn h_index(citations: Vec<i32>) -> i32 {
+    let mut index = -1;
+
+    for (paper, cite) in citations.iter().enumerate() {
+        if *cite as usize >= citations.len() - paper {
+            index = paper as i32;
+            break;
+        }
+    }
+    return if index != -1 { citations.len() as i32 - index } else { 0 };
 }

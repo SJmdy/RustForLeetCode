@@ -336,5 +336,10 @@ fn main() {
     let nums = [5, 1, 1, 2, 0, 0].to_vec();
     let r = array::sort_array(nums);
     println!("r: {:?}", r);
+
+    // 275. H 指数 II
+    let citations = [0].to_vec();
+    let r = array::h_index(citations);
+    println!("r: {:?}", r);
 }
 
