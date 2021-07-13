@@ -2,7 +2,9 @@
 
 
 use std::cmp::min;
+use std::option::Option::Some;
 use std::collections::{LinkedList, HashMap};
+
 
 /// 54. 螺旋矩阵
 ///
@@ -107,11 +109,9 @@ pub fn generate_matrix(n: i32) -> Vec<Vec<i32>> {
 }
 
 
-/// 面试题 17.21. 直方图的水量
+/// [面试题 17.21. 直方图的水量](https://leetcode-cn.com/problems/volume-of-histogram-lcci/)
 ///
 /// 给定一个直方图(也称柱状图)，假设有人从上面源源不断地倒水，最后直方图能存多少水量?直方图的宽度为 1。
-///
-/// LC: [面试题 17.21 直方图的水量](https://leetcode-cn.com/problems/volume-of-histogram-lcci/)
 ///
 /// 解题思路：双指针
 ///
@@ -472,20 +472,7 @@ pub fn remove_duplicates2(nums: &mut Vec<i32>) -> i32 {
 ///
 /// 给你 旋转后 的数组 nums 和一个整数 target ，请你编写一个函数来判断给定的目标值是否存在于数组中。如果 nums 中存在这个目标值 target ，则返回 true ，否则返回 false 。
 pub fn search(nums: Vec<i32>, target: i32) -> bool {
-    // return nums.contains(&target);
-    if nums.is_empty() { return false; }
-
-    let (mut left, mut right) = (0, nums.len() - 1);
-    while left <= right {
-        let mid = (left + right) / 2;
-        if nums[mid] == target { return true; }
-        if nums[mid] > nums[right] {
-            left = mid + 1;
-        } else {
-            right -= 1;
-        }
-    }
-    return false;
+    return nums.contains(&target);
 }
 
 
