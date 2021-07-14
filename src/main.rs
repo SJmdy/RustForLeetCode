@@ -352,5 +352,11 @@ fn main() {
     let height = [4, 2, 0, 3, 2, 5].to_vec();
     let r = stack_or_queue::trap(height);
     println!("r: {:?}", r);
+
+    // 剑指 Offer 53 - I. 在排序数组中查找数字 I
+    let nums = [0].to_vec();
+    let target = 0;
+    let r = array::search_jz53(nums, target);
+    println!("r: {:?}", r);
 }
 

@@ -605,3 +605,52 @@ pub fn h_index(citations: Vec<i32>) -> i32 {
     }
     return if index != -1 { citations.len() as i32 - index } else { 0 };
 }
+
+
+/// [剑指 Offer 53 - I. 在排序数组中查找数字 I](https://leetcode-cn.com/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/)
+///
+/// 统计一个数字在排序数组中出现的次数。
+pub fn search_jz53(nums: Vec<i32>, target: i32) -> i32 {
+    if nums.is_empty() { return 0; }
+
+    let (mut left, mut right) = (0, nums.len());
+    let (mut left_index, mut right_index) = (-1, -1);
+
+    // 找左侧的点
+    while left < right {
+        let mid = (left + right) / 2;
+        if nums[mid] == target {
+            if mid == 0 || nums[mid - 1] < target {
+                left_index = mid as i32;
+                break;
+            } else {
+                right = mid;
+            }
+        } else if nums[mid] > target {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    if left_index == -1 { return 0; }
+
+    // 找右侧的点
+    let (mut left, mut right) = (0, nums.len());
+    while left < right {
+        let mid = (left + right) / 2;
+        if nums[mid] == target {
+            if mid == nums.len() - 1 || nums[mid + 1] > target {
+                right_index = mid as i32;
+                break;
+            } else {
+                left = mid + 1;
+            }
+        } else if nums[mid] > target {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    if right_index == -1 { return 0; }
+    return right_index - left_index + 1;
+}
