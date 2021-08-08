@@ -1,9 +1,9 @@
 //! 与数组有关的问题，如滑窗法等
 
 
-use std::cmp::min;
+use std::cmp::{min, max};
 use std::option::Option::Some;
-use std::collections::{LinkedList, HashMap};
+use std::collections::{LinkedList, HashMap, HashSet};
 
 
 /// 54. 螺旋矩阵
@@ -420,27 +420,29 @@ pub fn merge(nums1: &mut Vec<i32>, m: i32, nums2: &mut Vec<i32>, n: i32) {
     }
     if n == 0 { return; }
     let (mut cur1, mut cur2, mut cur) = (m - 1, n - 1, nums1.len() as i32 - 1);
-
-    loop {
+    while cur >= 0 {
         match (cur1 == -1, cur2 == -1) {
-            (true, true) | (false, true) => break,
+            (true, true) => break,
             (true, false) => {
-                let (left, _) = nums1.split_at_mut(cur as usize + 1);
-                left.copy_from_slice(&nums2[..cur2 as usize + 1]);
-                break;
+                nums1[cur as usize] = nums2[cur2 as usize];
+                cur2 -= 1;
+            }
+            (false, true) => {
+                nums1[cur as usize] = nums1[cur1 as usize];
+                cur1 -= 1;
             }
             (false, false) => {
-                if nums1[cur1 as usize] > nums2[cur2 as usize] {
+                if nums1[cur1 as usize] >= nums2[cur2 as usize] {
                     nums1[cur as usize] = nums1[cur1 as usize];
                     cur1 -= 1;
                 } else {
                     nums1[cur as usize] = nums2[cur2 as usize];
                     cur2 -= 1;
-                };
-                cur -= 1;
+                }
             }
         };
-    };
+        cur -= 1;
+    }
 }
 
 
@@ -472,7 +474,40 @@ pub fn remove_duplicates2(nums: &mut Vec<i32>) -> i32 {
 ///
 /// 给你 旋转后 的数组 nums 和一个整数 target ，请你编写一个函数来判断给定的目标值是否存在于数组中。如果 nums 中存在这个目标值 target ，则返回 true ，否则返回 false 。
 pub fn search(nums: Vec<i32>, target: i32) -> bool {
-    return nums.contains(&target);
+    if nums.is_empty() { return false; }
+    if nums.len() == 1 { return nums[0] == target; }
+
+    let (mut left_cur, mut right_cur) = (0, nums.len() - 1);
+    while left_cur < right_cur {
+        let mid = left_cur + (right_cur - left_cur) / 2;
+        if nums[mid] == target || nums[left_cur] == target || nums[right_cur] == target { return true; }
+
+        if nums[mid] > nums[right_cur] {
+            // [left_cur, mid] 有序
+            if nums[left_cur] < target && nums[mid] > target {
+                // target 在 [left_cur, mid] 区间内
+                if mid == 0 { return false; }
+                right_cur = mid - 1;
+            } else {
+                left_cur = mid + 1;
+            }
+        } else if nums[mid] < nums[right_cur] {
+            // [mid, right_cur] 有序
+            if nums[mid] < target && nums[right_cur] > target {
+                // target 在 [mid, right_cur] 区间内
+                left_cur = mid + 1;
+            } else {
+                if mid == 0 { return false; }
+                right_cur = mid - 1;
+            }
+        } else {
+            // 无法确定哪个区间有序, 1. right_cur -= 1; 2. left_cur += 1任选一个或一起用
+            if mid == 0 { return false; }
+            right_cur -= 1;
+            left_cur += 1;
+        }
+    }
+    return false;
 }
 
 
@@ -489,11 +524,12 @@ pub fn search(nums: Vec<i32>, target: i32) -> bool {
 /// LC: [153. 寻找旋转排序数组中的最小值](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array/)
 pub fn find_min(nums: Vec<i32>) -> i32 {
     if nums.is_empty() { return -1; }
-    let (mut left_cur, mut right_cur) = (0, nums.len() - 1);
+    if nums.len() == 1 { return nums[0]; }
 
+    let (mut left_cur, mut right_cur) = (0, nums.len() - 1);
     while left_cur < right_cur {
-        let mid = (left_cur + right_cur) / 2;
-        if nums[mid] < nums[nums.len() - 1] {
+        let mid = left_cur + (right_cur - left_cur) / 2;
+        if nums[mid] < nums[right_cur] {
             right_cur = mid;
         } else {
             left_cur = mid + 1;
@@ -512,18 +548,23 @@ pub fn find_min(nums: Vec<i32>) -> i32 {
 pub fn find_max_length(nums: Vec<i32>) -> i32 {
     if nums.len() < 2 { return 0; }
 
-    let mut res = 0;
     let mut count = 0;
-    let mut count_index: HashMap<i32, usize> = std::collections::HashMap::new();
-    for (idx, n) in nums.into_iter().enumerate() {
-        count += if n == 1 { 1 } else { -1 };
+    let mut index_record: HashMap<i32, usize> = HashMap::new();
+    let mut res = 0;
+
+    for (idx, n) in nums.iter().enumerate() {
+        if *n == 0 {
+            count += 1;
+        } else {
+            count -= 1;
+        }
         if count == 0 {
             res = idx + 1;
             continue;
         }
-        match count_index.get(&count) {
-            Some(index) => res = std::cmp::max(res, idx - *index),
-            None => { count_index.insert(count, idx); }
+        match index_record.get(&count) {
+            Some(index) => res = max(res, idx - *index),
+            None => { index_record.insert(count, idx); }
         }
     }
     return res as i32;
@@ -653,4 +694,480 @@ pub fn search_jz53(nums: Vec<i32>, target: i32) -> i32 {
     }
     if right_index == -1 { return 0; }
     return right_index - left_index + 1;
+}
+
+
+/// [1838. 最高频元素的频数](https://leetcode-cn.com/problems/frequency-of-the-most-frequent-element/)
+///
+/// 元素的 频数 是该元素在一个数组中出现的次数。给你一个整数数组 nums 和一个整数 k 。在一步操作中，你可以选择 nums 的一个下标，并将该下标对应元素的值增加 1 。执行最多 k 次操作后，返回数组中最高频元素的 最大可能频数 。
+pub fn max_frequency(nums: Vec<i32>, k: i32) -> i32 {
+    if nums.is_empty() { return 0; }
+    if nums.len() == 1 { return 0; }
+
+    let mut nums = nums;
+    nums.sort();
+
+    let mut prefix_sum = vec![0; nums.len() + 1];
+    // prefix_sum[i] = sum(nums[0], ..., nums[i - 1])
+    prefix_sum[0] = nums[0];
+    for i in 1..nums.len() {
+        prefix_sum[i] = nums[i - 1] + prefix_sum[i - 1];
+    }
+
+    // 判断窗口长度 len 是否满足存在 i，使得nums[i: i + window_len]中的元素经 k 次变换成为 nums[i + window_length - 1]
+    fn check(len: usize, nums: &Vec<i32>, prefix_sum: &Vec<i32>, k: i32) -> bool {
+        for i in 0..nums.len() - len {
+            // 当前窗口内的所有元素的和
+            let window_sum = prefix_sum[i + len] - prefix_sum[i];
+            // 元素都变成nums[i + window_length - 1]后的窗口内的所有元素的和
+            let target = nums[i + len - 1] * (len as i32);
+            if target - window_sum <= k {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 寻找窗口长度 window_length，存在 i，使得nums[i: i + window_length]中的元素经 k 次变换都能成为 nums[i + window_length - 1]
+    let (mut left, mut right) = (0, nums.len());
+    while left < right {
+        // println!("left: {} | right: {}", left, right);
+        let len = (left + right) / 2;
+        if check(len, &nums, &prefix_sum, k) {
+            // 当前长度可以满足
+            left = if left == len { len + 1 } else { len };
+        } else {
+            right = len - 1;
+        }
+    }
+    return left as i32;
+}
+
+
+/// [剑指 Offer 03. 数组中重复的数字](https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/)
+///
+/// 找出数组中重复的数字。
+/// 在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。
+///
+/// 解题思路：长度为 n 的数组中的所有数字都在 0 ~ n - 1 的范围内，若不存在重复数字，那么可以做到下标与数字相对应
+pub fn find_repeat_number(nums: Vec<i32>) -> i32 {
+    let mut nums = nums;
+    for i in 0..nums.len() {
+        // index i 对应的位置不是 i，要对 i 进行归位
+        while nums[i] != i as i32 {
+            // 当前 index i 对应的位置设为 m
+            let m = nums[i];
+            // index i 对应的位置为 m，index m 对应的位置也为 m，且 m != i，则 m 重复了
+            if nums[m as usize] == m {
+                return m;
+            }
+            // 将 index m 对应位置的数交换给 index i
+            nums[i] = nums[m as usize];
+            // 将 m 归位
+            nums[m as usize] = m;
+        }
+    }
+    return -1;
+}
+
+/// 剑指 Offer 03 - 2. 不修改数组找到重复的数字
+///
+/// 在一个长度为n + 1的数组里所有的数字都在1~n的范围内，所以数组中至少有一个数字是重复的。请找出数组中任意一个重复的数字， 但不能修改输入的数组。
+///
+/// 解题思路：计算 nums 中值位于 [start, end] 的数字的个数 n，如果 n > end - start + 1，那说明重复数字的值位于 [start, end] 间
+pub fn find_repeat_number_without_change_array(nums: Vec<i32>) -> i32 {
+    fn num_count_in_value_domain(start: i32, end: i32, nums: &Vec<i32>) -> i32 {
+        let mut count = 0;
+        for n in nums.iter() {
+            if *n >= start && *n <= end {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
+    let (mut start, mut end) = (0, nums.len() as i32 - 1);
+    while start < end {
+        let mid = (start + end) / 2;
+        if num_count_in_value_domain(start, mid, &nums) > mid - start + 1 {
+            end = mid;
+            continue;
+        }
+        if num_count_in_value_domain(mid, end, &nums) > end - mid + 1 {
+            start = mid;
+            continue;
+        }
+    }
+    return start;
+}
+
+
+/// [剑指 Offer 04. 二维数组中的查找](https://leetcode-cn.com/problems/er-wei-shu-zu-zhong-de-cha-zhao-lcof/)
+///
+/// 在一个 n * m 的二维数组中，每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。 请完成一个高效的函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
+///
+/// 解题思路：从右上角开始找
+pub fn find_number_in2_d_array(matrix: Vec<Vec<i32>>, target: i32) -> bool {
+    if matrix.is_empty() { return false; }
+    let rows = matrix.len();
+    let cols = matrix[0].len();
+    if cols == 0 { return false; }
+
+    if target < matrix[0][0] || target > matrix[rows - 1][cols - 1] { return false; }
+
+    let (mut row_index, mut col_index) = (0, cols - 1);
+    loop {
+        if matrix[row_index][col_index] == target {
+            return true;
+        } else if matrix[row_index][col_index] > target {
+            if col_index == 0 {
+                return false;
+            } else {
+                col_index -= 1;
+            }
+        } else {
+            if row_index == rows - 1 {
+                return false;
+            } else {
+                row_index += 1;
+            }
+        }
+    }
+}
+
+
+/// [剑指 Offer 05. 替换空格](https://leetcode-cn.com/problems/ti-huan-kong-ge-lcof/)
+///
+/// 请实现一个函数，把字符串 s 中的每个空格替换成"%20"。
+pub fn replace_space(s: String) -> String {
+    if s.is_empty() { return s; }
+
+    let mut chars = std::collections::LinkedList::new();
+    for c in s.chars().into_iter() {
+        match c {
+            ' ' => {
+                chars.push_back('%');
+                chars.push_back('2');
+                chars.push_back('0');
+            }
+            _ => {
+                chars.push_back(c);
+            }
+        }
+    }
+    return chars.into_iter().map(|c| { c }).collect::<String>();
+}
+
+
+/// [剑指 Offer 11. 旋转数组的最小数字](https://leetcode-cn.com/problems/xuan-zhuan-shu-zu-de-zui-xiao-shu-zi-lcof/)
+///
+/// 把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。输入一个递增排序的数组的一个旋转，输出旋转数组的最小元素。例如，数组 [3,4,5,1,2] 为 [1,2,3,4,5] 的一个旋转，该数组的最小值为1。
+///
+/// 解题思路：判断 mid 位于哪个有序数组，重点是考虑数组完全不旋转的情况
+pub fn min_array(numbers: Vec<i32>) -> i32 {
+    if numbers.is_empty() { return 0; }
+    if numbers.len() == 1 { return numbers[0]; }
+
+    let (mut left_cur, mut right_cur) = (0, numbers.len() - 1);
+
+    while left_cur < right_cur {
+        let mid = (left_cur + right_cur) / 2;
+        if numbers[mid] > numbers[right_cur] {
+            left_cur = mid + 1;
+        } else if numbers[mid] == numbers[right_cur] {
+            right_cur -= 1;
+        } else {
+            right_cur = mid;
+        }
+    }
+    return numbers[left_cur];
+}
+
+
+/// 1337. 矩阵中战斗力最弱的 K 行
+///
+/// 给你一个大小为 m * n 的矩阵 mat，矩阵由若干军人和平民组成，分别用 1 和 0 表示。请你返回矩阵中战斗力最弱的 k 行的索引，按从最弱到最强排序。
+/// 如果第 i 行的军人数量少于第 j 行，或者两行军人数量相同但 i 小于 j，那么我们认为第 i 行的战斗力比第 j 行弱。军人 总是 排在一行中的靠前位置，也就是说 1 总是出现在 0 之前。
+pub fn k_weakest_rows(mat: Vec<Vec<i32>>, k: i32) -> Vec<i32> {
+    let rows = mat.len();
+    if rows == 0 { return Vec::new(); }
+    let cols = mat[0].len();
+    if cols == 0 { return Vec::new(); }
+
+    let mut row_value = HashMap::new();
+    for i in 0..mat.len() {
+        let mut v = 0;
+        for j in 0..mat[0].len() {
+            if mat[i][j] == 0 {
+                break;
+            }
+            v += 1;
+        }
+        row_value.insert(i as i32, v);
+    }
+
+    let mut row_value = row_value.into_iter().map(|(row, v)| { [row, v] }).collect::<Vec<[i32; 2]>>();
+    row_value.sort_by(|a, b| {
+        if a[1] == b[1] {
+            return a[0].cmp(&b[0]);
+        }
+        return a[1].cmp(&b[1]);
+    });
+    let res = row_value.into_iter().map(|[i, _]| { i }).collect::<Vec<i32>>();
+    return res[..k as usize].to_vec();
+}
+
+
+/// [剑指 Offer 21. 调整数组顺序使奇数位于偶数前面](https://leetcode-cn.com/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
+///
+/// 输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分。
+pub fn exchange(nums: Vec<i32>) -> Vec<i32> {
+    if nums.is_empty() { return Vec::new(); }
+
+    let mut nums = nums;
+    let (mut left_cur, mut right_cur) = (0, nums.len() - 1);
+
+    while left_cur < right_cur {
+        while nums[right_cur] % 2 == 0 && left_cur < right_cur {
+            right_cur -= 1;
+        }
+        while nums[left_cur] % 2 == 1 && left_cur < right_cur {
+            left_cur += 1;
+        }
+        nums.swap(left_cur, right_cur);
+    }
+    return nums;
+}
+
+
+/// [189. 旋转数组](https://leetcode-cn.com/problems/rotate-array/)
+///
+/// 给定一个数组，将数组中的元素向右移动 k 个位置，其中 k 是非负数。
+///
+/// 解题思路：
+/// 1. 翻转：先将数组整体翻转；再分别翻转前 k 个元素和后 k 个元素
+/// 2. 原数组第 i 个元素在 k 次交换后的位置变为 (i + k) % len，可以不断做交换操作
+pub fn rotate(nums: &mut Vec<i32>, k: i32) {
+    if nums.len() < 2 { return; }
+    let k = k as usize % nums.len();
+    if k == 0 { return; }
+
+    // 1. 翻转
+    // fn reverse(nums: &mut Vec<i32>, start: usize, end: usize) {
+    //     let (mut start, mut end) = (start, end);
+    //     while start < end {
+    //         nums.swap(start, end);
+    //         start += 1;
+    //         end -= 1;
+    //     }
+    // }
+    //
+    // let length = nums.len();
+    // reverse(nums, 0, length - 1);
+    // reverse(nums, 0, k - 1);
+    // reverse(nums, k, length - 1);
+
+    // 2. 交换: 使用 count 统计交换过的元素数量
+    // let mut count = 0;
+    // for i in 0..nums.len() {
+    //     let mut cur = i;
+    //     let mut value = nums[i];
+    //     count += 1;
+    //     loop {
+    //         let next = (cur + k) % nums.len();
+    //
+    //         std::mem::swap(&mut value, &mut nums[next]);
+    //
+    //         cur = next;
+    //         if cur == i { break; }
+    //         count += 1;
+    //     }
+    //     if count >= nums.len() {
+    //         break;
+    //     }
+    // }
+
+    // 2. 交换: 最大的交换轮次为 k 和 nums.len() 的最大公约数
+    fn gcd(a: usize, b: usize) -> usize {
+        return if b == 0 { a } else { gcd(b, a % b) };
+    }
+
+    for i in 0..gcd(k, nums.len()) {
+        let mut cur = i;
+        let mut value = nums[i];
+
+        loop {
+            let next = (cur + k) % nums.len();
+            std::mem::swap(&mut value, &mut nums[next]);
+            cur = next;
+            if cur == i { break; }
+        }
+    }
+}
+
+
+/// [面试题 10.03. 搜索旋转数组](https://leetcode-cn.com/problems/search-rotate-array-lcci/)
+///
+/// 搜索旋转数组。给定一个排序后的数组，包含n个整数，但这个数组已被旋转过很多次了，次数不详。请编写代码找出数组中的某个元素，假设数组元素原先是按升序排列的。若有多个相同元素，返回索引值最小的一个。
+pub fn search_1003(arr: Vec<i32>, target: i32) -> i32 {
+    if arr.is_empty() { return -1; }
+    if arr.len() == 1 { return if arr[0] == target { 0 } else { -1 }; }
+
+    let (mut left_cur, mut right_cur) = (0, arr.len() - 1);
+    while left_cur < right_cur {
+        let mid = left_cur + (right_cur - left_cur) / 2;
+        let mut cur = if arr[left_cur] == target {
+            left_cur
+        } else if arr[mid] == target {
+            mid
+        } else if arr[right_cur] == target {
+            right_cur
+        } else {
+            arr.len()
+        };
+        if cur != arr.len() {
+            while cur > 0 && arr[cur - 1] == target {
+                cur -= 1;
+            }
+            return cur as i32;
+        }
+
+        if arr[mid] < arr[right_cur] {
+            // [mid, right_cur] 有序
+            if arr[mid] < target && arr[right_cur] > target {
+                left_cur = mid + 1;
+            } else {
+                if mid == 0 { return -1; }
+                right_cur = mid - 1;
+            }
+        } else if arr[mid] > arr[right_cur] {
+            // [left_cur, mid] 有序
+            if arr[left_cur] < target && arr[mid] > target {
+                if mid == 0 { return -1; }
+                right_cur = mid - 1;
+            } else {
+                left_cur = mid + 1;
+            }
+        } else {
+            // 不确定哪个有序; 1. left_cur += 1; 2. right_cur -= 1; 任选一个或混用
+            left_cur += 1;
+            if right_cur == 0 { return -1; }
+            right_cur -= 1;
+        }
+    }
+    return -1;
+}
+
+
+/// [剑指 Offer II 119. 最长连续序列](https://leetcode-cn.com/problems/WhsWhI/)
+///
+/// 给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+pub fn longest_consecutive(nums: Vec<i32>) -> i32 {
+    if nums.len() < 2 { return nums.len() as i32; }
+
+    // 1. 排序
+    // let mut nums = nums;
+    // nums.sort();
+    // let (mut res, mut segment_max) = (1, 1);
+    // for i in 1..nums.len() {
+    //     if nums[i] == nums[i - 1] + 1 {
+    //         segment_max += 1;
+    //     } else if nums[i] == nums[i - 1] {
+    //         continue
+    //     } else {
+    //         res = max(res, segment_max);
+    //         segment_max = 1;
+    //     }
+    // }
+    // res = max(res, segment_max);
+
+    // 2. Hash
+    let mut nums = nums.into_iter().map(|v| { v }).collect::<HashSet<i32>>();
+    let mut values = nums.iter().map(|v| { *v }).collect::<LinkedList<i32>>();
+
+    let mut res = 1;
+    while !nums.is_empty() && !values.is_empty() {
+        let now = values.pop_front().unwrap();
+        if !nums.contains(&now) { continue; }
+
+        let mut segment_max = 1;
+
+        let (mut left, mut right) = (now - 1, now + 1);
+        nums.remove(&now);
+
+        while nums.contains(&left) {
+            nums.remove(&left);
+            segment_max += 1;
+            left -= 1;
+        }
+        while nums.contains(&right) {
+            nums.remove(&right);
+            segment_max += 1;
+            right += 1;
+        }
+        res = max(res, segment_max);
+    }
+    return res;
+}
+
+
+/// [剑指 Offer 57 - II. 和为s的连续正数序列](https://leetcode-cn.com/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
+///
+/// 输入一个正整数 target ，输出所有和为 target 的连续正整数序列（至少含有两个数）。
+pub fn find_continuous_sequence(target: i32) -> Vec<Vec<i32>> {
+    if target < 3 { return Vec::new(); }
+
+    let end = target / 2 + 2;
+
+    let mut res = Vec::new();
+    let mut window: Vec<i32> = Vec::new();
+    let mut window_sum = 0;
+
+    let mut cur = 1;
+    while cur <= end {
+        if window_sum == target {
+            res.push(window.clone());
+            window_sum -= window[0];
+            window.remove(0);
+        } else if window_sum < target {
+            window.push(cur);
+            window_sum += cur;
+            cur += 1;
+        } else {
+            window_sum -= window[0];
+            window.remove(0);
+        }
+    }
+    return res;
+}
+
+
+/// [581. 最短无序连续子数组](https://leetcode-cn.com/problems/shortest-unsorted-continuous-subarray/)
+///
+/// 给你一个整数数组 nums ，你需要找出|一个 连续子数组 ，如果对这个子数组进行升序排序，那么整个数组都会变为升序排序。请你找出符合题意的 最短 子数组，并输出它的长度。
+///
+/// 解题思路：查找无序的边界
+pub fn find_unsorted_subarray(nums: Vec<i32>) -> i32 {
+    if nums.len() < 2 { return 0; }
+    if nums.len() == 2 { return if nums[0] <= nums[1] { 0 } else { 2 } }
+
+    let (mut segment_max, mut segment_min) = (i32::MIN, i32::MAX);
+    let (mut left_border, mut right_border) = (0, 0);
+
+    for i in 0..nums.len() {
+        if nums[i] >= segment_max {
+            segment_max = nums[i];
+        } else {
+            right_border = i;
+        }
+    }
+    for i in (0..nums.len()).rev() {
+        if nums[i] <= segment_min {
+            segment_min = nums[i];
+        } else {
+            left_border = i;
+        }
+    }
+
+    return if left_border == right_border { 0 } else { (right_border - left_border) as i32 + 1 };
 }

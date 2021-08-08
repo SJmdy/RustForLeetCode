@@ -3,6 +3,8 @@
 use std::cmp::min;
 use std::collections::LinkedList;
 
+use crate::common::ListNode;
+
 
 /// 1047. 删除字符串中的所有相邻重复项 [✔]
 ///
@@ -301,4 +303,20 @@ pub fn trap(height: Vec<i32>) -> i32 {
         stack.push_back(i);
     }
     return res;
+}
+
+
+/// [剑指 Offer 06. 从尾到头打印链表](https://leetcode-cn.com/problems/cong-wei-dao-tou-da-yin-lian-biao-lcof/)
+///
+/// 输入一个链表的头节点，从尾到头反过来返回每个节点的值（用数组返回）。
+pub fn reverse_print(head: Option<Box<ListNode>>) -> Vec<i32> {
+    if head.is_none() { return Vec::new(); }
+    let mut cur = head;
+    let mut records = Vec::new();
+    while cur.is_some() {
+        let next = cur.as_mut().unwrap().next.take();
+        records.push(cur.unwrap().val);
+        cur = next;
+    }
+    return records.into_iter().rev().collect::<Vec<i32>>();
 }

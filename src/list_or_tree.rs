@@ -300,3 +300,82 @@ pub fn min_diff_in_bst(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
     }
     return diff;
 }
+
+
+/// [剑指 Offer 07. 重建二叉树](https://leetcode-cn.com/problems/zhong-jian-er-cha-shu-lcof/)
+///
+/// 输入某二叉树的前序遍历和中序遍历的结果，请重建该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+///
+/// 解题思路：
+///
+///     1. 前序遍历：先根节点，再左子树，再右子树
+///     2. 中序遍历：先左子树，再根节点。再右子树
+///     3. 后序遍历：先左子树，再右子树，再根节点
+/// 注意：“序”指的是根节点被遍历的次序
+pub fn build_tree(preorder: Vec<i32>, inorder: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {
+    fn dfs(preorder: Vec<i32>, inorder: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {
+        if preorder.is_empty() || inorder.is_empty() || preorder.len() != inorder.len() { return None; }
+
+        let root_value = preorder[0];
+        let root = Rc::new(RefCell::new(TreeNode { val: root_value, left: None, right: None }));
+
+        let root_value_pos = inorder.iter().position(|v| { *v == root_value }).unwrap();
+        let left_preorder = preorder[1..1 + root_value_pos].to_vec();
+        let right_preorder = preorder[root_value_pos + 1..].to_vec();
+        let left_inorder = inorder[..root_value_pos].to_vec();
+        let right_inorder = inorder[root_value_pos + 1..].to_vec();
+
+        root.borrow_mut().left = dfs(left_preorder, left_inorder);
+        root.borrow_mut().right = dfs(right_preorder, right_inorder);
+        return Some(root);
+    }
+    return dfs(preorder, inorder);
+}
+
+
+/// [1123. 最深叶节点的最近公共祖先}(https://leetcode-cn.com/problems/lowest-common-ancestor-of-deepest-leaves/)
+///
+/// 给你一个有根节点的二叉树，找到它最深的叶节点的最近公共祖先。回想一下：
+/// 1. 叶节点 是二叉树中没有子节点的节点
+/// 2. 树的根节点的 深度 为 0，如果某一节点的深度为 d，那它的子节点的深度就是 d+1
+/// 3. 如果我们假定 A 是一组节点 S 的 最近公共祖先，S 中的每个节点都在以 A 为根节点的子树中，且 A 的深度达到此条件下可能的最大值。
+pub fn lca_deepest_leaves(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
+    if root.is_none() || (root.as_ref().unwrap().borrow().left.is_none() && root.as_ref().unwrap().borrow().right.is_none()) { return root; }
+
+    fn get_depth(node: Rc<RefCell<TreeNode>>, depth: i32) -> i32 {
+        let mut left_depth = 0;
+        if let Some(left) = &node.borrow().left {
+            left_depth = get_depth(Rc::clone(left), depth + 1)
+        }
+        let mut right_depth = 0;
+        if let Some(right) = &node.borrow().right {
+            right_depth = get_depth(Rc::clone(right), depth + 1)
+        }
+        return max(max(left_depth, right_depth), depth);
+    }
+    let depth = get_depth(Rc::clone(root.as_ref().unwrap()), 1);
+
+    fn dfs(node: Rc<RefCell<TreeNode>>, depth: i32, target_depth: i32) -> Option<Rc<RefCell<TreeNode>>> {
+        if depth == target_depth {
+            return if node.borrow().left.is_some() || node.borrow().right.is_some() {
+                Some(node)
+            } else {
+                None
+            };
+        }
+
+        let mut n1: Option<Rc<RefCell<TreeNode>>> = None;
+        if let Some(left) = &node.borrow().left {
+            n1 = dfs(Rc::clone(left), depth + 1, target_depth);
+        }
+        let mut n2: Option<Rc<RefCell<TreeNode>>> = None;
+        if let Some(right) = &node.borrow().right {
+            n2 = dfs(Rc::clone(right), depth + 1, target_depth);
+        }
+
+        return if n1.is_some() { n1 } else { n2 };
+    }
+
+    return dfs(Rc::clone(root.as_ref().unwrap()), 1, depth - 1);
+}
+

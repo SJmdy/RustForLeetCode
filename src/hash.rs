@@ -144,3 +144,47 @@ pub fn find_max_length(nums: Vec<i32>) -> i32 {
     // }
     // return res as i32;
 }
+
+
+/// [15. 三数之和](https://leetcode-cn.com/problems/3sum/)
+///
+/// 给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。注意：答案中不可以包含重复的三元组。
+pub fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
+    if nums.len() < 3 { return Vec::new(); }
+    let mut nums = nums;
+    nums.sort();
+    let mut record = Vec::new();
+    for k in 0..nums.len() {
+        if k > 0 && nums[k] == nums[k - 1] {
+            continue
+        }
+
+        let (mut left_cur, mut right_cur) = (k + 1, nums.len() - 1);
+        while left_cur < right_cur {
+            let s = nums[k] + nums[left_cur] + nums[right_cur];
+            if s == 0 {
+                record.push(vec![nums[k], nums[left_cur], nums[right_cur]]);
+                left_cur += 1;
+                while left_cur < right_cur && nums[left_cur] == nums[left_cur - 1] {
+                    left_cur += 1;
+                }
+                right_cur -= 1;
+                while left_cur < right_cur && nums[right_cur] == nums[right_cur + 1] {
+                    right_cur -= 1;
+                }
+            } else if s < 0 {
+                left_cur += 1;
+                while left_cur < right_cur && nums[left_cur] == nums[left_cur - 1] {
+                    left_cur += 1;
+                }
+            } else {
+                right_cur -= 1;
+                while left_cur < right_cur && nums[right_cur] == nums[right_cur + 1] {
+                    right_cur -= 1;
+                }
+            }
+        }
+    }
+
+    return record;
+}

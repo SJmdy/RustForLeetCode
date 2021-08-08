@@ -108,15 +108,11 @@ pub fn longest_common_subsequence(text1: String, text2: String) -> i32 {
 }
 
 
-/// 115. 不同的子序列 [✔]
+/// [115. 不同的子序列](https://leetcode-cn.com/problems/distinct-subsequences/)
 ///
 /// 给定一个字符串 s 和一个字符串 t ，计算在 s 的子序列中 t 出现的个数。
 ///
-/// 字符串的一个 子序列 是指，通过删除一些（也可以不删除）字符且不干扰剩余字符相对位置所组成的新字符串。（例如，"ACE" 是 "ABCDE" 的一个子序列，而 "AEC" 不是）
-///
-/// 题目数据保证答案符合 32 位带符号整数范围。
-///
-/// LC: [115. 不同的子序列](https://leetcode-cn.com/problems/distinct-subsequences/)
+/// 字符串的一个 子序列 是指，通过删除一些（也可以不删除）字符且不干扰剩余字符相对位置所组成的新字符串。（例如，"ACE" 是 "ABCDE" 的一个子序列，而 "AEC" 不是）。题目数据保证答案符合 32 位带符号整数范围。
 ///
 /// 解题思路：深搜 超时啦超时啦 | 动态规划 [✔]
 ///
@@ -133,9 +129,10 @@ pub fn num_distinct(s: String, t: String) -> i32 {
     if s.is_empty() || t.is_empty() || s.len() < t.len() { return 0; }
     if s.len() == t.len() { return if s.eq(&t) { 1 } else { 0 }; }
 
-    let s = s.chars().collect::<Vec<char>>();
-    let t = t.chars().collect::<Vec<char>>();
+    // dp[i][j]: s[..i]与t[..j]的匹配个数
     let mut dp = vec![vec![0; t.len()]; s.len()];
+    let s = s.chars().into_iter().collect::<Vec<char>>();
+    let t = t.chars().into_iter().collect::<Vec<char>>();
 
     dp[0][0] = if s[0] == t[0] { 1 } else { 0 };
     for i in 1..s.len() {
@@ -149,12 +146,13 @@ pub fn num_distinct(s: String, t: String) -> i32 {
     for i in 1..s.len() {
         for j in 1..t.len() {
             dp[i][j] = if s[i] == t[j] {
-                dp[i - 1][j] + dp[i - 1][j - 1]
+                dp[i - 1][j - 1] + dp[i - 1][j]
             } else {
                 dp[i - 1][j]
             }
         }
     }
+
     return dp[s.len() - 1][t.len() - 1];
 }
 
@@ -184,37 +182,6 @@ pub fn check_subarray_sum(nums: Vec<i32>, k: i32) -> bool {
         }
     }
     return false;
-}
-
-
-/// 300. 最长递增子序列 [✔]
-///
-/// 给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。
-///
-/// 子序列是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。
-///
-/// LC: [300. 最长递增子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
-///
-/// 解题思路：动态规划
-///
-/// dp[i]: 以**nums[i]为结尾字符**的最长严格递增子序列的长度。
-///
-/// 则有：
-///
-/// dp[i] = max(dp[j]) + 1, 0 <= j < i and nums[j] < nums[i]
-pub fn length_of_lis(nums: Vec<i32>) -> i32 {
-    if nums.is_empty() { return 0; }
-
-    let mut dp = vec![1; nums.len()];
-
-    for i in 1..dp.len() {
-        for j in 0..i {
-            if nums[i] > nums[j] {
-                dp[i] = if dp[i] < dp[j] + 1 { dp[j] + 1 } else { dp[i] };
-            }
-        }
-    }
-    return dp.into_iter().max().unwrap();
 }
 
 
@@ -540,4 +507,157 @@ pub fn rob(nums: Vec<i32>) -> i32 {
         }
     }
     return dp[dp.len() - 1];
+}
+
+
+/// [剑指 Offer 10- II. 青蛙跳台阶问题](https://leetcode-cn.com/problems/qing-wa-tiao-tai-jie-wen-ti-lcof)
+///
+/// 一只青蛙一次可以跳上1级台阶，也可以跳上2级台阶。求该青蛙跳上一个 n 级的台阶总共有多少种跳法。
+pub fn num_ways(n: i32) -> i32 {
+    if n == 0 { return 1; }
+    if n == 1 { return 1; }
+    if n == 2 { return 2; }
+
+    let mut dp = vec![0; n as usize + 1];
+    dp[1] = 1;
+    dp[2] = 2;
+    for i in 3..dp.len() {
+        dp[i] = (dp[i - 1] + dp[i - 2]) % 1000000007;
+    }
+    return dp[n as usize];
+}
+
+
+/// [剑指 Offer 42. 连续子数组的最大和](https://leetcode-cn.com/problems/lian-xu-zi-shu-zu-de-zui-da-he-lcof/)
+///
+/// 输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。要求时间复杂度为O(n)。
+pub fn max_sub_array(nums: Vec<i32>) -> i32 {
+    if nums.is_empty() { return 0; }
+    let mut dp = vec![0; nums.len()];
+    dp[0] = nums[0];
+    for i in 1..dp.len() {
+        dp[i] = max(nums[i], dp[i - 1] + nums[i]);
+    }
+    return dp[dp.len() - 1];
+}
+
+
+/// [剑指 Offer 14- I. 剪绳子](https://leetcode-cn.com/problems/jian-sheng-zi-lcof/)
+///
+/// 给你一根长度为 n 的绳子，请把绳子剪成整数长度的 m 段（m、n都是整数，n>1并且m>1），每段绳子的长度记为 k[0],k[1]...k[m-1] 。请问 k[0]*k[1]*...*k[m-1] 可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。
+///
+/// 解题思路：
+///
+/// > dp[n]: 长度为 n 的绳子切成 m 份的最大乘积
+/// > dp[n] = max(dp[n - x] * dp[x])
+/// > dp[n - x]: 长度为 n - x 的绳子切成 m_1 分的最大乘积
+pub fn cutting_rope(n: i32) -> i32 {
+    if n == 0 { return 0; }
+    if n == 1 { return 1; }
+    if n == 2 { return 1; }
+    if n == 3 { return 2; }
+    if n == 4 { return 4; }
+
+    let n = n as usize;
+
+    let mut dp = vec![0; n + 1];
+    // dp[i]: 长度为 i 的绳子剪成 m 段的最大乘积
+    // [注意]：并不相同
+    dp[0] = 0;
+    dp[1] = 1;
+    dp[2] = 2;
+    dp[3] = 3;
+    dp[4] = 4;
+
+    for i in 5..n + 1 {
+        dp[i] = (0..i).into_iter().map(|v| {
+            dp[i - v] * dp[v]
+        }).max().unwrap();
+    }
+    return dp[n];
+}
+
+
+/// [面试题 08.11. 硬币](https://leetcode-cn.com/problems/coin-lcci/)
+///
+/// 硬币。给定数量不限的硬币，币值为 25 分、10 分、5 分和1 分，编写代码计算 n 分有几种表示法。(结果可能会很大，你需要将结果模上1000000007)
+///
+/// 解题思路：
+///
+/// dp[i][v]: 使用前 i 种硬币组成面值 v 的组合数，设第 i 种硬币的面值为 c[i]
+/// dp[i][v] = sum(dp[i - 1][v - j * c[i]]), j 表示使用第 i 种硬币的个数
+pub fn ways_to_change(n: i32) -> i32 {
+    if n < 5 { return 1; }
+    let n = n as usize;
+    let coins = [1, 5, 10, 25];
+    let mut dp = vec![0; n + 1];
+    dp[0] = 1;
+
+    for c in 0..coins.len() {
+        let coin = coins[c];
+        for i in coin..n + 1 {
+            dp[i] = (dp[i] + dp[i - coin]) % 1000000007;
+        }
+    }
+    return dp[n] as i32;
+
+    // if n < 5 { return 1; }
+    // let n = n as usize;
+    // let mut dp = vec![vec![0; n + 1]; 4];
+    // let coins = [1, 5, 10, 25];
+    // let base = 1000000007;
+    //
+    // for i in 0..4 { dp[i][0] = 1; }
+    // for i in 0..n + 1 { dp[0][i] = 1; }
+    //
+    // for i in 1..4 {
+    //     for v in 1..n + 1 {
+    //         dp[i][v] = if v < coins[i] {
+    //             dp[i - 1][v]
+    //         } else {
+    //             (dp[i - 1][v] + dp[i][v - coins[i]]) % base
+    //         };
+    //     }
+    // }
+    // return dp[3][n];
+}
+
+
+/// [300. 最长递增子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
+///
+/// 给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。子序列是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。
+pub fn length_of_lis(nums: Vec<i32>) -> i32 {
+    if nums.is_empty() { return 0; }
+    let mut dp = vec![1; nums.len()];
+    // dp[i]: 以 nums[i]为结尾的最长递增子序列长度
+    for i in 1..dp.len() {
+        for j in 0..i {
+            if nums[i] > nums[j] {
+                dp[i] = max(dp[i], dp[j] + 1);
+            }
+        }
+    }
+    return *dp.iter().max().unwrap();
+}
+
+
+/// [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/)
+///
+/// 给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回 -1 。你可以认为每种硬币的数量是无限的。
+pub fn coin_change(coins: Vec<i32>, amount: i32) -> i32 {
+    if coins.is_empty() || amount == 0 { return 0; }
+    let amount = amount as usize;
+
+    let mut dp = vec![amount as i32 + 1; amount + 1];
+    dp[0] = 0;
+
+    for i in 1..dp.len() {
+        for c in 0..coins.len() {
+            let coin = coins[c] as usize;
+            if i >= coin {
+                dp[i] = min(dp[i], dp[i - coin] + 1);
+            }
+        }
+    }
+    return if dp[amount] == amount as i32 + 1 { -1 } else { dp[amount] };
 }
