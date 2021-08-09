@@ -752,22 +752,38 @@ pub fn max_frequency(nums: Vec<i32>, k: i32) -> i32 {
 /// 解题思路：长度为 n 的数组中的所有数字都在 0 ~ n - 1 的范围内，若不存在重复数字，那么可以做到下标与数字相对应
 pub fn find_repeat_number(nums: Vec<i32>) -> i32 {
     let mut nums = nums;
+
     for i in 0..nums.len() {
-        // index i 对应的位置不是 i，要对 i 进行归位
         while nums[i] != i as i32 {
-            // 当前 index i 对应的位置设为 m
-            let m = nums[i];
-            // index i 对应的位置为 m，index m 对应的位置也为 m，且 m != i，则 m 重复了
-            if nums[m as usize] == m {
-                return m;
+            // 第 i 个元素不在第 i 个位置上
+            let m = nums[i] as usize;
+            if nums[m] == m as i32 {
+                // 第 m 个元素在第 i 个位置上，同时也在第 m 个位置上，重复
+                return m as i32;
             }
-            // 将 index m 对应位置的数交换给 index i
-            nums[i] = nums[m as usize];
-            // 将 m 归位
-            nums[m as usize] = m;
+            // 第 m 个元素归位，并将位置 m 的元素交换到第 i 个位置
+            nums.swap(m, i);
         }
     }
     return -1;
+
+    // let mut nums = nums;
+    // for i in 0..nums.len() {
+    //     // index i 对应的位置不是 i，要对 i 进行归位
+    //     while nums[i] != i as i32 {
+    //         // 当前 index i 对应的位置设为 m
+    //         let m = nums[i];
+    //         // index i 对应的位置为 m，index m 对应的位置也为 m，且 m != i，则 m 重复了
+    //         if nums[m as usize] == m {
+    //             return m;
+    //         }
+    //         // 将 index m 对应位置的数交换给 index i
+    //         nums[i] = nums[m as usize];
+    //         // 将 m 归位
+    //         nums[m as usize] = m;
+    //     }
+    // }
+    // return -1;
 }
 
 /// 剑指 Offer 03 - 2. 不修改数组找到重复的数字
@@ -1149,7 +1165,7 @@ pub fn find_continuous_sequence(target: i32) -> Vec<Vec<i32>> {
 /// 解题思路：查找无序的边界
 pub fn find_unsorted_subarray(nums: Vec<i32>) -> i32 {
     if nums.len() < 2 { return 0; }
-    if nums.len() == 2 { return if nums[0] <= nums[1] { 0 } else { 2 } }
+    if nums.len() == 2 { return if nums[0] <= nums[1] { 0 } else { 2 }; }
 
     let (mut segment_max, mut segment_min) = (i32::MIN, i32::MAX);
     let (mut left_border, mut right_border) = (0, 0);
@@ -1170,4 +1186,30 @@ pub fn find_unsorted_subarray(nums: Vec<i32>) -> i32 {
     }
 
     return if left_border == right_border { 0 } else { (right_border - left_border) as i32 + 1 };
+}
+
+
+/// [剑指 Offer 48. "最长不含重复字符的子字符串](https://leetcode-cn.com/problems/zui-chang-bu-han-zhong-fu-zi-fu-de-zi-zi-fu-chuan-lcof/)
+///
+/// 请从字符串中找出一个最长的不包含重复字符的子字符串，计算该最长子字符串的长度。
+pub fn length_of_longest_substring(s: String) -> i32 {
+    if s.len() < 2 { return s.len() as i32; };
+    let chars = s.chars().collect::<Vec<char>>();
+
+    let mut window: HashSet<char> = HashSet::new();
+    let (mut left_cur, mut right_cur) = (0, 1);
+    window.insert(chars[0]);
+    let mut res = 0;
+
+    while right_cur < chars.len() {
+        if !window.contains(&chars[right_cur]) {
+            window.insert(chars[right_cur]);
+            right_cur += 1;
+        } else {
+            res = max(res, right_cur - left_cur);
+            window.remove(&chars[left_cur]);
+            left_cur += 1;
+        }
+    }
+    return max(res, right_cur - left_cur) as i32;
 }

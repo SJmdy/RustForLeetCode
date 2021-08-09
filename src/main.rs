@@ -341,11 +341,6 @@ fn main() {
     let r = array::max_frequency(nums, k);
     println!("r: {:?}", r);
 
-    // 剑指 Offer 03. 数组中重复的数字
-    let nums = [2, 3, 1, 0, 2, 5, 3].to_vec();
-    let r = array::find_repeat_number(nums);
-    println!("r: {:?}", r);
-
     // 剑指 Offer 03 - 2. 不修改数组找到重复的数字
     let nums = [2, 3, 1, 1, 2, 6, 3].to_vec();
     let r = array::find_repeat_number_without_change_array(nums);
@@ -488,6 +483,21 @@ fn main() {
     // [581. 最短无序连续子数组](https://leetcode-cn.com/problems/shortest-unsorted-continuous-subarray/)
     let nums = [1, 2, 3, 4].to_vec();
     let r = array::find_unsorted_subarray(nums);
+    println!("r: {:?}", r);
+
+    // [剑指 Offer 48. "最长不含重复字符的子字符串](https://leetcode-cn.com/problems/zui-chang-bu-han-zhong-fu-zi-fu-de-zi-zi-fu-chuan-lcof/)
+    let s = "pwwkew".to_string();
+    let r = array::length_of_longest_substring(s);
+    println!("r: {:?}", r);
+
+    // 剑指 Offer 03. 数组中重复的数字
+    let nums = [2, 3, 1, 0, 2, 5, 3].to_vec();
+    let r = array::find_repeat_number(nums);
+    println!("r: {:?}", r);
+
+    // [47. 全排列 II](https://leetcode-cn.com/problems/permutations-ii/)
+    let nums = [1, 1, 2].to_vec();
+    let r = recursion::permute_unique(nums);
     println!("r: {:?}", r);
 }
 

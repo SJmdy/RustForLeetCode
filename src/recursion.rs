@@ -1,7 +1,7 @@
 //! 使用递归 / 回溯解决的题目
 
 
-use std::collections::LinkedList;
+use std::collections::{LinkedList, HashSet};
 
 /// 131. 分割回文串 [✔]
 ///
@@ -278,5 +278,52 @@ pub fn moving_count(m: i32, n: i32, k: i32) -> i32 {
             res += 1;
         }
     }
+    return res;
+}
+
+
+/// [47. 全排列 II](https://leetcode-cn.com/problems/permutations-ii/)
+///
+/// 给定一个可包含重复数字的序列 nums ，按任意顺序 返回所有不重复的全排列。
+pub fn permute_unique(nums: Vec<i32>) -> Vec<Vec<i32>> {
+    if nums.is_empty() { return Vec::new(); }
+
+    fn dfs(
+        res: &mut Vec<Vec<i32>>, path: &mut Vec<i32>, nums: &Vec<i32>, mask: &mut Vec<bool>,
+    ) {
+        if path.len() == nums.len() {
+            res.push((*path).clone());
+            return;
+        }
+
+        let mut layer_mask = HashSet::new();
+        for i in 0..nums.len() {
+            if mask[i] { continue; }
+            if layer_mask.contains(&nums[i]) { continue; }
+
+            layer_mask.insert(nums[i]);
+            mask[i] = true;
+            path.push(nums[i]);
+            dfs(res, path, nums, mask);
+            path.pop();
+            mask[i] = false;
+        }
+    }
+
+    let mut res = Vec::new();
+    let mut mask = vec![false; nums.len()];
+    let mut path = Vec::new();
+    let mut layer_mask = HashSet::new();
+    for i in 0..nums.len() {
+        if layer_mask.contains(&nums[i]) {continue}
+        layer_mask.insert(nums[i]);
+
+        mask[i] = true;
+        path.push(nums[i]);
+        dfs(&mut res, &mut path, &nums, &mut mask);
+        path.pop();
+        mask[i] = false;
+    }
+
     return res;
 }
